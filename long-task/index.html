@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Test Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="An example of a very fast page.">
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: auto;
+        padding: 16px;
+        background-color: #f0f0f0;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        max-width: 80ch;
+
+    }
+    h1 {
+        text-align: center;
+    }
+
+    p {
+        text-align: left;
+    }
+</style>
+
+
+<body>
+    <h1>long task</h1>
+    <p> This is a page should be super fast but it has a long task that blocks the event loop for about 2 seconds</p>
+    <p  ><strong>Task status: </strong><span id="task">please wait...</span></p>
+
+
+    <script type="text/javascript">
+        function longTask() {
+            const time = new Date().getTime();
+            while (new Date().getTime() - time < 2000) {
+                // do nothing
+            }
+            document.getElementById('task').innerText = 'Task done you have waited about 2 seconds';
+        }
+        setTimeout(longTask, 0);
+     </script>
+</body>
+
+</html>
