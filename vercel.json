@@ -9,11 +9,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "destination": "/:path*.html",
-      "source": "/:path"
-    }
   ]
 }
