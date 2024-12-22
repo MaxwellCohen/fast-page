@@ -18,6 +18,7 @@
         max-width: 80ch;
 
     }
+
     h1 {
         text-align: center;
     }
@@ -31,19 +32,22 @@
 <body>
     <h1>long task</h1>
     <p> This is a page should be super fast but it has a long task that blocks the event loop for about 2 seconds</p>
-    <p  ><strong>Task status: </strong><span id="task">please wait...</span></p>
+    <p><strong>Task status: </strong><span id="task">please wait...</span></p>
 
 
     <script type="text/javascript">
         function longTask() {
             const time = new Date().getTime();
-            while (new Date().getTime() - time < 2000) {
-                // do nothing
+            let count = 0;
+            let diff = new Date().getTime() - time;
+            while (diff < 2000 || count < 10_000_000) {
+                diff = new Date().getTime() - time;
+                count += 1;
             }
-            document.getElementById('task').innerText = 'Task done you have waited about 2 seconds';
+            document.getElementById('task').innerText = `Task done you have waited about ${(diff / 1000).toFixed(0)} seconds`;
         }
         setTimeout(longTask, 0);
-     </script>
+    </script>
 </body>
 
 </html>

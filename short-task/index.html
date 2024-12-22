@@ -16,7 +16,6 @@
         display: flex;
         flex-direction: column;
         max-width: 80ch;
-
     }
 
     h1 {
@@ -38,8 +37,9 @@
     <script type="text/javascript">
         (async function wait() {
             const time = new Date().getTime();
+            let count = 0;
             let diff = new Date().getTime() - time
-            while (diff < 2000) {
+            while (diff < 2000 || count < 10_000_000) {
                 if (diff % 40 === 0) {
                     if (scheduler && scheduler?.yield) {
                         await scheduler?.yield?.();
@@ -47,11 +47,11 @@
                         await new Promise((resolve) => setTimeout(resolve, 0));
                     }
                 }
-
+                count += 1;
                 diff = new Date().getTime() - time
                 // do nothing
             }
-            document.getElementById('task').innerText = 'Task done you have waited about 2 seconds';
+            document.getElementById('task').innerText = `Task done you have waited about ${(diff / 1000).toFixed(0)} seconds`;
         })()
 
     </script>
