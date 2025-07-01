@@ -12,7 +12,7 @@
     <script>
       console.log("before script", performance.now() - window.time);
     </script>
-
+    <link rel="stylesheet" href="/script-loading/style.css" />
     <script src="/script-loading/blockingTask.js" defer></script>
 
     <script>
@@ -20,7 +20,7 @@
     </script>
   </head>
   <body>
-    <div id="__nuxt">
+    <div class="center">
       <h1>Hello World!</h1>
       <script>
         console.log(performance.now() - window.time);
@@ -53,7 +53,7 @@
             https://placehold.co/2300x1725/red/black 2300w
           "
           media="(max-width: 900px)"
-          sizes="50vw" />
+          sizes="100vw" />
         <source
           srcset="
             https://placehold.co/100x75/blue/white     100w,
@@ -81,7 +81,7 @@
             https://placehold.co/2300x1725/blue/white 2300w
           "
           media="(min-width: 900px)"
-          sizes="25vw" />
+          sizes="50vw" />
         <img
           decoding="async"
           src="https://placehold.co/600x400"
