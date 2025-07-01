@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Lots of Short Tasks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A page that is fast even though it has a lot of short tasks that run.">
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: auto;
+        padding: 16px;
+        background-color: #f0f0f0;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        max-width: 80ch;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    p {
+        text-align: left;
+    }
+</style>
+
+
+<body>
+    <h1>Short Task</h1>
+    <p> This is a page should be super fast it has a task that takes about 2 seconds but is broken up to not block the
+        event loop</p>
+    <p><strong>Task status: </strong><span id="task">please wait...</span></p>
+
+    <script type="text/javascript">
+        ( function wait() {
+            const time = new Date().getTime();
+            let count = 0;
+            let diff = new Date().getTime() - time
+            while (diff < 2000 || count < 10_000_000) {
+                if (diff % 40 === 0) {
+                    if (scheduler && scheduler?.yield) {
+                     scheduler?.yield?.();
+                    } else {
+                         new Promise((resolve) => setTimeout(resolve, 0));
+                    }
+                }
+                count += 1;
+                diff = new Date().getTime() - time
+                // do nothing
+            }
+            document.getElementById('task').innerText = `Task done you have waited about ${(diff / 1000).toFixed(0)} seconds`;
+        })()
+
+    </script>
+</body>
+
+</html>
