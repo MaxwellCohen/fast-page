@@ -13,7 +13,16 @@
       console.log("before script", performance.now() - window.time);
     </script>
     <link rel="stylesheet" href="/script-loading/style.css" />
-    <script src="/script-loading/blockingTask.js" role="module"></script>
+    <script>
+      const now = new Date().getTime() + 1000;
+      let x = 0;
+      console.log("task start", x);
+      while (now > new Date().getTime()) {
+        x = x + 1;
+      }
+
+      console.log("task end", x);
+    </script>
 
     <script>
       console.log("after script", performance.now() - window.time);
@@ -86,6 +95,7 @@
           decoding="async"
           src="https://placehold.co/600x400"
           alt="Image Alt Text"
+          fetchpriority="high"
       /></picture>
     </div>
     <script>
