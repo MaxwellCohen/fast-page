@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      window.time = performance.now();
+      console.log("top of head", performance.now() - window.time);
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Async Script</title>
+
+    <script>
+      console.log("before script", performance.now() - window.time);
+    </script>
+    <link rel="stylesheet" href="/script-loading-timeout/style.css" />
+
+    <script src="/script-loading-timeout/blockingTask.js" async></script>
+
+    <script>
+      console.log("after script", performance.now() - window.time);
+    </script>
+  </head>
+  <body>
+    <div class="center">
+      <h1>Hello World!</h1>
+      <script>
+        console.log(performance.now() - window.time);
+      </script>
+      <picture
+        ><source
+          srcset="
+            https://placehold.co/100x75/red/black     100w,
+            https://placehold.co/200x150/red/black    200w,
+            https://placehold.co/300x225/red/black    300w,
+            https://placehold.co/400x300/red/black    400w,
+            https://placehold.co/500x375/red/black    500w,
+            https://placehold.co/600x450/red/black    600w,
+            https://placehold.co/700x525/red/black    700w,
+            https://placehold.co/800x600/red/black    800w,
+            https://placehold.co/900x675/red/black    900w,
+            https://placehold.co/1000x750/red/black  1000w,
+            https://placehold.co/1100x825/red/black  1100w,
+            https://placehold.co/1200x900/red/black  1200w,
+            https://placehold.co/1300x975/red/black  1300w,
+            https://placehold.co/1400x1050/red/black 1400w,
+            https://placehold.co/1500x1125/red/black 1500w,
+            https://placehold.co/1600x1200/red/black 1600w,
+            https://placehold.co/1700x1275/red/black 1700w,
+            https://placehold.co/1800x1350/red/black 1800w,
+            https://placehold.co/1900x1425/red/black 1900w,
+            https://placehold.co/2000x1500/red/black 2000w,
+            https://placehold.co/2100x1575/red/black 2100w,
+            https://placehold.co/2200x1650/red/black 2200w,
+            https://placehold.co/2300x1725/red/black 2300w
+          "
+          media="(max-width: 900px)"
+          sizes="100vw" />
+        <source
+          srcset="
+            https://placehold.co/100x75/blue/white     100w,
+            https://placehold.co/200x150/blue/white    200w,
+            https://placehold.co/300x225/blue/white    300w,
+            https://placehold.co/400x300/blue/white    400w,
+            https://placehold.co/500x375/blue/white    500w,
+            https://placehold.co/600x450/blue/white    600w,
+            https://placehold.co/700x525/blue/white    700w,
+            https://placehold.co/800x600/blue/white    800w,
+            https://placehold.co/900x675/blue/white    900w,
+            https://placehold.co/1000x750/blue/white  1000w,
+            https://placehold.co/1100x825/blue/white  1100w,
+            https://placehold.co/1200x900/blue/white  1200w,
+            https://placehold.co/1300x975/blue/white  1300w,
+            https://placehold.co/1400x1050/blue/white 1400w,
+            https://placehold.co/1500x1125/blue/white 1500w,
+            https://placehold.co/1600x1200/blue/white 1600w,
+            https://placehold.co/1700x1275/blue/white 1700w,
+            https://placehold.co/1800x1350/blue/white 1800w,
+            https://placehold.co/1900x1425/blue/white 1900w,
+            https://placehold.co/2000x1500/blue/white 2000w,
+            https://placehold.co/2100x1575/blue/white 2100w,
+            https://placehold.co/2200x1650/blue/white 2200w,
+            https://placehold.co/2300x1725/blue/white 2300w
+          "
+          media="(min-width: 900px)"
+          sizes="50vw" />
+        <img
+          decoding="async"
+          src="https://placehold.co/600x400"
+          alt="Image Alt Text"
+          fetchpriority="high"
+      /></picture>
+    </div>
+    <script>
+      console.log("end of html", performance.now() - window.time);
+    </script>
+  </body>
+</html>
