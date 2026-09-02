@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>SVG / MathML streaming + &lt;template for&gt;</title>
+    <script src="https://unpkg.com/template-for-polyfill"></script>
+    
+
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: Canvas;
+        --text: CanvasText;
+        --muted: color-mix(in srgb, CanvasText 62%, Canvas);
+        --panel: color-mix(in srgb, Canvas 88%, CanvasText 12%);
+        --border: color-mix(in srgb, CanvasText 18%, Canvas);
+        --ok: #1a7f4c;
+        --bad: #c62828;
+        --code: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --ok: #3dd68c;
+          --bad: #ff6b6b;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font: 16px/1.5 ui-sans-serif, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 28px 20px 48px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.45rem;
+      }
+
+      .lede {
+        color: var(--muted);
+        margin: 0 0 24px;
+      }
+
+      section {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        margin: 0 0 18px;
+        background: var(--panel);
+      }
+
+      h2 {
+        margin: 0 0 6px;
+        font-size: 1.05rem;
+      }
+
+      .why {
+        color: var(--muted);
+        margin: 0 0 14px;
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+      }
+
+      .badge.bad {
+        background: color-mix(in srgb, var(--bad) 18%, transparent);
+        color: var(--bad);
+      }
+
+      .badge.ok {
+        background: color-mix(in srgb, var(--ok) 18%, transparent);
+        color: var(--ok);
+      }
+
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      @media (max-width: 640px) {
+        .compare {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      figure {
+        margin: 0;
+      }
+
+      figcaption {
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .stage {
+        position: relative;
+        width: 160px;
+        height: 100px;
+        border: 2px dashed var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .stage svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .stage.math {
+        width: auto;
+        min-width: 160px;
+        height: auto;
+        min-height: 72px;
+        padding: 16px 22px;
+        display: grid;
+        place-items: center;
+        overflow: visible;
+      }
+
+      .stage math {
+        font-size: 1.35rem;
+      }
+
+      .stage.empty::after {
+        content: 'nothing painted';
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: var(--bad);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        pointer-events: none;
+      }
+
+      pre,
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+      }
+
+      pre {
+        margin: 12px 0 0;
+        padding: 12px;
+        background: var(--code);
+        border-radius: 8px;
+        white-space: pre-wrap;
+        overflow: auto;
+      }
+
+      .expected-note,
+      .limit-note {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 0.92rem;
+      }
+
+      .expected-note {
+        border: 1px solid color-mix(in srgb, var(--ok) 40%, var(--border));
+        background: color-mix(in srgb, var(--ok) 10%, transparent);
+      }
+
+      .limit-note {
+        border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--border));
+        background: color-mix(in srgb, var(--bad) 10%, transparent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>SVG / MathML streaming with <code>&lt;template for&gt;</code></h1>
+      <p class="lede">
+        Streaming SVG or MathML <em>children</em> with
+        <code>&lt;template for&gt;</code> fails: the insert is HTML-namespaced,
+        so nothing paints. Stream the whole <code>&lt;svg&gt;</code> or
+        <code>&lt;math&gt;</code> instead.
+      </p>
+
+      <section>
+        <span class="badge bad">Limit</span>
+        <h2>DPU completion inside <code>&lt;svg&gt;</code></h2>
+        <p class="why">
+          <code>&lt;template for&gt;</code> inserts an HTML-namespaced
+          <code>&lt;circle&gt;</code> into an existing <code>&lt;svg&gt;</code>.
+          It is not an <code>SVGElement</code>, so it never paints.
+        </p>
+        <p class="limit-note">
+          <strong>Limit:</strong> the dashed frame stays empty. The streamed
+          circle is HTML, not SVG.
+        </p>
+        <div class="compare">
+          <figure>
+            <figcaption>Streamed (DPU)</figcaption>
+            <div class="stage" id="streamed">
+              <svg width="160" height="100" viewBox="0 0 160 100">
+                <?start name="svg-slot">
+                <text x="8" y="20" font-size="12">Loading…</text>
+                <?end>
+              </svg>
+              <template for="svg-slot">
+                <!--s:svg-slot-->
+                <?start name="svg-slot">
+                <circle
+                  cx="80"
+                  cy="55"
+                  r="24"
+                  fill="tomato"
+                  stroke="white"
+                  stroke-width="2"
+                />
+                <?end>
+                <!--/s:svg-slot-->
+              </template>
+            </div>
+          </figure>
+          <figure>
+            <figcaption>Expected result</figcaption>
+            <div class="stage">
+              <svg width="160" height="100" viewBox="0 0 160 100">
+                <circle
+                  cx="80"
+                  cy="55"
+                  r="24"
+                  fill="tomato"
+                  stroke="white"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+          </figure>
+        </div>
+        <pre>&lt;svg&gt;
+  &lt;?start name="svg-slot"&gt;
+  &lt;text&gt;Loading…&lt;/text&gt;
+  &lt;?end&gt;
+&lt;/svg&gt;
+&lt;template for="svg-slot"&gt;
+  &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
+&lt;/template&gt;</pre>
+      </section>
+
+      <section>
+        <span class="badge ok">Works</span>
+        <h2>Stream the whole <code>&lt;svg&gt;</code></h2>
+        <p class="why">
+          Replace the pending range with a complete <code>&lt;svg&gt;</code>
+          tree. The HTML parser puts it in the SVG namespace, so the circle
+          paints.
+        </p>
+        <p class="expected-note">
+          <strong>Expected:</strong> a tomato circle paints in the dashed frame.
+        </p>
+        <div class="compare">
+          <figure>
+            <figcaption>Streamed (DPU)</figcaption>
+            <div class="stage" id="streamed-whole-svg">
+              <?start name="svg-whole">
+              Loading…
+              <?end>
+              <template for="svg-whole">
+                <!--s:svg-whole-->
+                <?start name="svg-whole">
+                <svg width="160" height="100" viewBox="0 0 160 100">
+                  <circle
+                    cx="80"
+                    cy="55"
+                    r="24"
+                    fill="tomato"
+                    stroke="white"
+                    stroke-width="2"
+                  />
+                </svg>
+                <?end>
+                <!--/s:svg-whole-->
+              </template>
+            </div>
+          </figure>
+          <figure>
+            <figcaption>Expected result</figcaption>
+            <div class="stage">
+              <svg width="160" height="100" viewBox="0 0 160 100">
+                <circle
+                  cx="80"
+                  cy="55"
+                  r="24"
+                  fill="tomato"
+                  stroke="white"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+          </figure>
+        </div>
+        <pre>&lt;?start name="svg-whole"&gt;
+Loading…
+&lt;?end&gt;
+&lt;template for="svg-whole"&gt;
+  &lt;svg width="160" height="100" viewBox="0 0 160 100"&gt;
+    &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
+  &lt;/svg&gt;
+&lt;/template&gt;</pre>
+      </section>
+
+      <section>
+        <span class="badge ok">Works</span>
+        <h2>Same circle parsed as SVG (not via <code>&lt;template&gt;</code>)</h2>
+        <p class="why">
+          If the whole <code>&lt;svg&gt;&lt;circle&gt;</code> is HTML-parsed as
+          one tree, the parser puts the circle in the SVG namespace and it
+          paints. The failure is insertion from HTML
+          <code>&lt;template&gt;</code> into an existing <code>&lt;svg&gt;</code>.
+        </p>
+        <div class="stage">
+          <svg width="160" height="100" viewBox="0 0 160 100">
+            <circle
+              cx="80"
+              cy="55"
+              r="24"
+              fill="tomato"
+              stroke="white"
+              stroke-width="2"
+            />
+          </svg>
+        </div>
+      </section>
+
+      <section>
+        <span class="badge bad">Limit</span>
+        <h2>DPU completion inside <code>&lt;math&gt;</code></h2>
+        <p class="why">
+          Same limit as SVG: <code>&lt;template for&gt;</code> inserts
+          HTML-namespaced <code>&lt;mi&gt;</code> / <code>&lt;mo&gt;</code> /
+          <code>&lt;mn&gt;</code> into an existing <code>&lt;math&gt;</code>.
+          They are not MathML, so they typeset as plain text (or not at all).
+        </p>
+        <p class="limit-note">
+          <strong>Limit:</strong> no italic variables or stacked exponents. The
+          streamed tokens are HTML, not MathML.
+        </p>
+        <div class="compare">
+          <figure>
+            <figcaption>Streamed (DPU)</figcaption>
+            <div class="stage math" id="streamed-math">
+              <math display="block">
+                <?start name="math-slot">
+                <mtext>Loading…</mtext>
+                <?end>
+              </math>
+              <template for="math-slot">
+                <!--s:math-slot-->
+                <?start name="math-slot">
+                <msup><mi>a</mi><mn>2</mn></msup>
+                <mo>+</mo>
+                <msup><mi>b</mi><mn>2</mn></msup>
+                <mo>=</mo>
+                <msup><mi>c</mi><mn>2</mn></msup>
+                <?end>
+                <!--/s:math-slot-->
+              </template>
+            </div>
+          </figure>
+          <figure>
+            <figcaption>Expected result</figcaption>
+            <div class="stage math">
+              <math display="block">
+                <msup><mi>a</mi><mn>2</mn></msup>
+                <mo>+</mo>
+                <msup><mi>b</mi><mn>2</mn></msup>
+                <mo>=</mo>
+                <msup><mi>c</mi><mn>2</mn></msup>
+              </math>
+            </div>
+          </figure>
+        </div>
+        <pre>&lt;math&gt;
+  &lt;?start name="math-slot"&gt;
+  &lt;mtext&gt;Loading…&lt;/mtext&gt;
+  &lt;?end&gt;
+&lt;/math&gt;
+&lt;template for="math-slot"&gt;
+  &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;mo&gt;+&lt;/mo&gt;
+  &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;mo&gt;=&lt;/mo&gt;
+  &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+&lt;/template&gt;</pre>
+      </section>
+
+      <section>
+        <span class="badge ok">Works</span>
+        <h2>Stream the whole <code>&lt;math&gt;</code></h2>
+        <p class="why">
+          Replace the pending range with a complete <code>&lt;math&gt;</code>
+          tree. The HTML parser puts the tokens in the MathML namespace, so
+          they typeset.
+        </p>
+        <p class="expected-note">
+          <strong>Expected:</strong> italic variables and stacked exponents
+          (real MathML namespace), not plain inline text.
+        </p>
+        <div class="compare">
+          <figure>
+            <figcaption>Streamed (DPU)</figcaption>
+            <div class="stage math" id="streamed-whole-math">
+              <?start name="math-whole">
+              Loading…
+              <?end>
+              <template for="math-whole">
+                <!--s:math-whole-->
+                <?start name="math-whole">
+                <math display="block">
+                  <msup><mi>a</mi><mn>2</mn></msup>
+                  <mo>+</mo>
+                  <msup><mi>b</mi><mn>2</mn></msup>
+                  <mo>=</mo>
+                  <msup><mi>c</mi><mn>2</mn></msup>
+                </math>
+                <?end>
+                <!--/s:math-whole-->
+              </template>
+            </div>
+          </figure>
+          <figure>
+            <figcaption>Expected result</figcaption>
+            <div class="stage math">
+              <math display="block">
+                <msup><mi>a</mi><mn>2</mn></msup>
+                <mo>+</mo>
+                <msup><mi>b</mi><mn>2</mn></msup>
+                <mo>=</mo>
+                <msup><mi>c</mi><mn>2</mn></msup>
+              </math>
+            </div>
+          </figure>
+        </div>
+        <pre>&lt;?start name="math-whole"&gt;
+Loading…
+&lt;?end&gt;
+&lt;template for="math-whole"&gt;
+  &lt;math display="block"&gt;
+    &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;+&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;=&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;/math&gt;
+&lt;/template&gt;</pre>
+      </section>
+
+      <section>
+        <span class="badge ok">Works</span>
+        <h2>Same formula parsed as MathML (not via <code>&lt;template&gt;</code>)</h2>
+        <p class="why">
+          If the whole <code>&lt;math&gt;…&lt;/math&gt;</code> is HTML-parsed as
+          one tree, the parser puts the tokens in the MathML namespace and they
+          typeset. The failure is insertion from HTML
+          <code>&lt;template&gt;</code> into an existing <code>&lt;math&gt;</code>.
+        </p>
+        <div class="stage math">
+          <math display="block">
+            <msup><mi>a</mi><mn>2</mn></msup>
+            <mo>+</mo>
+            <msup><mi>b</mi><mn>2</mn></msup>
+            <mo>=</mo>
+            <msup><mi>c</mi><mn>2</mn></msup>
+          </math>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
