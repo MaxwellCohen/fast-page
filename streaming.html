@@ -6,6 +6,17 @@
     <meta name="color-scheme" content="light dark" />
     <title>SVG / MathML streaming + &lt;template for&gt;</title>
     <script src="https://unpkg.com/template-for-polyfill"></script>
+    <script>
+      window.$RC = function (payloadId, boundaryId) {
+        var payload = document.getElementById(payloadId);
+        var boundary = document.getElementById(boundaryId);
+        boundary.replaceWith.apply(
+          boundary,
+          Array.prototype.slice.call(payload.childNodes)
+        );
+        payload.remove();
+      };
+    </script>
     
 
     <style>
@@ -98,6 +109,16 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
+      }
+
+      .compare.triple {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      @media (max-width: 720px) {
+        .compare.triple {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 640px) {
@@ -195,6 +216,15 @@
         border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--border));
         background: color-mix(in srgb, var(--bad) 10%, transparent);
       }
+
+      .stage .fallback {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
     </style>
   </head>
   <body>
@@ -204,7 +234,8 @@
         Streaming SVG or MathML <em>children</em> with
         <code>&lt;template for&gt;</code> fails: the insert is HTML-namespaced,
         so nothing paints. Stream the whole <code>&lt;svg&gt;</code> or
-        <code>&lt;math&gt;</code> instead.
+        <code>&lt;math&gt;</code> instead — or parse that tree in a
+        <code>&lt;div hidden&gt;</code> and swap it in with JS, like React/Sold/Preact SSR.
       </p>
 
       <section>
@@ -213,13 +244,15 @@
         <p class="why">
           <code>&lt;template for&gt;</code> inserts an HTML-namespaced
           <code>&lt;circle&gt;</code> into an existing <code>&lt;svg&gt;</code>.
-          It is not an <code>SVGElement</code>, so it never paints.
+          It is not an <code>SVGElement</code>, so it never paints. React-style JS
+          replaces a placeholder with a complete <code>&lt;svg&gt;</code>
+          parsed in a hidden div, so it does.
         </p>
         <p class="limit-note">
-          <strong>Limit:</strong> the dashed frame stays empty. The streamed
-          circle is HTML, not SVG.
+          <strong>Limit:</strong> the DPU frame stays empty. The streamed circle
+          is HTML, not SVG. The React column paints.
         </p>
-        <div class="compare">
+        <div class="compare triple">
           <figure>
             <figcaption>Streamed (DPU)</figcaption>
             <div class="stage" id="streamed">
@@ -243,6 +276,45 @@
                 <!--/s:svg-slot-->
               </template>
             </div>
+            <pre>&lt;svg&gt;
+  &lt;?start name="svg-slot"&gt;
+  &lt;text&gt;Loading…&lt;/text&gt;
+  &lt;?end&gt;
+&lt;/svg&gt;
+&lt;template for="svg-slot"&gt;
+  &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
+&lt;/template&gt;</pre>
+          </figure>
+          <figure>
+            <figcaption>JS replacement </figcaption>
+            <div class="stage" id="react-limit-svg-stage">
+              <span class="fallback" id="B-limit-svg">Loading…</span>
+            </div>
+            <div hidden id="S-limit-svg">
+              <svg width="160" height="100" viewBox="0 0 160 100">
+                <circle
+                  cx="80"
+                  cy="55"
+                  r="24"
+                  fill="tomato"
+                  stroke="white"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+            <script>
+              $RC('S-limit-svg', 'B-limit-svg');
+            </script>
+            <pre>&lt;div id="B"&gt;Loading…&lt;/div&gt;
+&lt;div hidden id="S"&gt;
+  &lt;svg&gt;
+    &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  B.replaceWith(...S.childNodes);
+  S.remove();
+&lt;/script&gt;</pre>
           </figure>
           <figure>
             <figcaption>Expected result</figcaption>
@@ -260,14 +332,6 @@
             </div>
           </figure>
         </div>
-        <pre>&lt;svg&gt;
-  &lt;?start name="svg-slot"&gt;
-  &lt;text&gt;Loading…&lt;/text&gt;
-  &lt;?end&gt;
-&lt;/svg&gt;
-&lt;template for="svg-slot"&gt;
-  &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
-&lt;/template&gt;</pre>
       </section>
 
       <section>
@@ -276,12 +340,13 @@
         <p class="why">
           Replace the pending range with a complete <code>&lt;svg&gt;</code>
           tree. The HTML parser puts it in the SVG namespace, so the circle
-          paints.
+          paints. React-style JS does the same swap from a hidden div.
         </p>
         <p class="expected-note">
-          <strong>Expected:</strong> a tomato circle paints in the dashed frame.
+          <strong>Expected:</strong> DPU, JS replacement, and the static result all
+          paint a tomato circle.
         </p>
-        <div class="compare">
+        <div class="compare triple">
           <figure>
             <figcaption>Streamed (DPU)</figcaption>
             <div class="stage" id="streamed-whole-svg">
@@ -305,6 +370,45 @@
                 <!--/s:svg-whole-->
               </template>
             </div>
+            <pre>&lt;?start name="svg-whole"&gt;
+Loading…
+&lt;?end&gt;
+&lt;template for="svg-whole"&gt;
+  &lt;svg width="160" height="100" viewBox="0 0 160 100"&gt;
+    &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
+  &lt;/svg&gt;
+&lt;/template&gt;</pre>
+          </figure>
+          <figure>
+            <figcaption>JS replacement </figcaption>
+            <div class="stage" id="react-whole-svg-stage">
+              <span class="fallback" id="B-whole-svg">Loading…</span>
+            </div>
+            <div hidden id="S-whole-svg">
+              <svg width="160" height="100" viewBox="0 0 160 100">
+                <circle
+                  cx="80"
+                  cy="55"
+                  r="24"
+                  fill="tomato"
+                  stroke="white"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+            <script>
+              $RC('S-whole-svg', 'B-whole-svg');
+            </script>
+            <pre>&lt;div id="B"&gt;Loading…&lt;/div&gt;
+&lt;div hidden id="S"&gt;
+  &lt;svg&gt;
+    &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
+  &lt;/svg&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  B.replaceWith(...S.childNodes);
+  S.remove();
+&lt;/script&gt;</pre>
           </figure>
           <figure>
             <figcaption>Expected result</figcaption>
@@ -322,37 +426,6 @@
             </div>
           </figure>
         </div>
-        <pre>&lt;?start name="svg-whole"&gt;
-Loading…
-&lt;?end&gt;
-&lt;template for="svg-whole"&gt;
-  &lt;svg width="160" height="100" viewBox="0 0 160 100"&gt;
-    &lt;circle cx="80" cy="55" r="24" fill="tomato"/&gt;
-  &lt;/svg&gt;
-&lt;/template&gt;</pre>
-      </section>
-
-      <section>
-        <span class="badge ok">Works</span>
-        <h2>Same circle parsed as SVG (not via <code>&lt;template&gt;</code>)</h2>
-        <p class="why">
-          If the whole <code>&lt;svg&gt;&lt;circle&gt;</code> is HTML-parsed as
-          one tree, the parser puts the circle in the SVG namespace and it
-          paints. The failure is insertion from HTML
-          <code>&lt;template&gt;</code> into an existing <code>&lt;svg&gt;</code>.
-        </p>
-        <div class="stage">
-          <svg width="160" height="100" viewBox="0 0 160 100">
-            <circle
-              cx="80"
-              cy="55"
-              r="24"
-              fill="tomato"
-              stroke="white"
-              stroke-width="2"
-            />
-          </svg>
-        </div>
       </section>
 
       <section>
@@ -363,12 +436,15 @@ Loading…
           HTML-namespaced <code>&lt;mi&gt;</code> / <code>&lt;mo&gt;</code> /
           <code>&lt;mn&gt;</code> into an existing <code>&lt;math&gt;</code>.
           They are not MathML, so they typeset as plain text (or not at all).
+          React-style JS replaces a placeholder with a complete
+          <code>&lt;math&gt;</code> parsed in a hidden div, so it typesets.
         </p>
         <p class="limit-note">
-          <strong>Limit:</strong> no italic variables or stacked exponents. The
-          streamed tokens are HTML, not MathML.
+          <strong>Limit:</strong> the DPU frame has no italic variables or
+          stacked exponents. The streamed tokens are HTML, not MathML. The
+          React column typesets.
         </p>
-        <div class="compare">
+        <div class="compare triple">
           <figure>
             <figcaption>Streamed (DPU)</figcaption>
             <div class="stage math" id="streamed-math">
@@ -389,6 +465,50 @@ Loading…
                 <!--/s:math-slot-->
               </template>
             </div>
+            <pre>&lt;math&gt;
+  &lt;?start name="math-slot"&gt;
+  &lt;mtext&gt;Loading…&lt;/mtext&gt;
+  &lt;?end&gt;
+&lt;/math&gt;
+&lt;template for="math-slot"&gt;
+  &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;mo&gt;+&lt;/mo&gt;
+  &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;mo&gt;=&lt;/mo&gt;
+  &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+&lt;/template&gt;</pre>
+          </figure>
+          <figure>
+            <figcaption>JS replacement </figcaption>
+            <div class="stage math" id="react-limit-math-stage">
+              <span class="fallback" id="B-limit-math">Loading…</span>
+            </div>
+            <div hidden id="S-limit-math">
+              <math display="block">
+                <msup><mi>a</mi><mn>2</mn></msup>
+                <mo>+</mo>
+                <msup><mi>b</mi><mn>2</mn></msup>
+                <mo>=</mo>
+                <msup><mi>c</mi><mn>2</mn></msup>
+              </math>
+            </div>
+            <script>
+              $RC('S-limit-math', 'B-limit-math');
+            </script>
+            <pre>&lt;div id="B"&gt;Loading…&lt;/div&gt;
+&lt;div hidden id="S"&gt;
+  &lt;math display="block"&gt;
+    &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;+&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;=&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;/math&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  B.replaceWith(...S.childNodes);
+  S.remove();
+&lt;/script&gt;</pre>
           </figure>
           <figure>
             <figcaption>Expected result</figcaption>
@@ -403,18 +523,6 @@ Loading…
             </div>
           </figure>
         </div>
-        <pre>&lt;math&gt;
-  &lt;?start name="math-slot"&gt;
-  &lt;mtext&gt;Loading…&lt;/mtext&gt;
-  &lt;?end&gt;
-&lt;/math&gt;
-&lt;template for="math-slot"&gt;
-  &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
-  &lt;mo&gt;+&lt;/mo&gt;
-  &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
-  &lt;mo&gt;=&lt;/mo&gt;
-  &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
-&lt;/template&gt;</pre>
       </section>
 
       <section>
@@ -423,13 +531,13 @@ Loading…
         <p class="why">
           Replace the pending range with a complete <code>&lt;math&gt;</code>
           tree. The HTML parser puts the tokens in the MathML namespace, so
-          they typeset.
+          they typeset. React-style JS does the same swap from a hidden div.
         </p>
         <p class="expected-note">
-          <strong>Expected:</strong> italic variables and stacked exponents
-          (real MathML namespace), not plain inline text.
+          <strong>Expected:</strong> DPU, JS replacement, and the static result all
+          typeset italic variables and stacked exponents.
         </p>
-        <div class="compare">
+        <div class="compare triple">
           <figure>
             <figcaption>Streamed (DPU)</figcaption>
             <div class="stage math" id="streamed-whole-math">
@@ -450,6 +558,50 @@ Loading…
                 <!--/s:math-whole-->
               </template>
             </div>
+            <pre>&lt;?start name="math-whole"&gt;
+Loading…
+&lt;?end&gt;
+&lt;template for="math-whole"&gt;
+  &lt;math display="block"&gt;
+    &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;+&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;=&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;/math&gt;
+&lt;/template&gt;</pre>
+          </figure>
+          <figure>
+            <figcaption>JS replacement </figcaption>
+            <div class="stage math" id="react-whole-math-stage">
+              <span class="fallback" id="B-whole-math">Loading…</span>
+            </div>
+            <div hidden id="S-whole-math">
+              <math display="block">
+                <msup><mi>a</mi><mn>2</mn></msup>
+                <mo>+</mo>
+                <msup><mi>b</mi><mn>2</mn></msup>
+                <mo>=</mo>
+                <msup><mi>c</mi><mn>2</mn></msup>
+              </math>
+            </div>
+            <script>
+              $RC('S-whole-math', 'B-whole-math');
+            </script>
+            <pre>&lt;div id="B"&gt;Loading…&lt;/div&gt;
+&lt;div hidden id="S"&gt;
+  &lt;math display="block"&gt;
+    &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;+&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+    &lt;mo&gt;=&lt;/mo&gt;
+    &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
+  &lt;/math&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  B.replaceWith(...S.childNodes);
+  S.remove();
+&lt;/script&gt;</pre>
           </figure>
           <figure>
             <figcaption>Expected result</figcaption>
@@ -463,38 +615,6 @@ Loading…
               </math>
             </div>
           </figure>
-        </div>
-        <pre>&lt;?start name="math-whole"&gt;
-Loading…
-&lt;?end&gt;
-&lt;template for="math-whole"&gt;
-  &lt;math display="block"&gt;
-    &lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
-    &lt;mo&gt;+&lt;/mo&gt;
-    &lt;msup&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
-    &lt;mo&gt;=&lt;/mo&gt;
-    &lt;msup&gt;&lt;mi&gt;c&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;
-  &lt;/math&gt;
-&lt;/template&gt;</pre>
-      </section>
-
-      <section>
-        <span class="badge ok">Works</span>
-        <h2>Same formula parsed as MathML (not via <code>&lt;template&gt;</code>)</h2>
-        <p class="why">
-          If the whole <code>&lt;math&gt;…&lt;/math&gt;</code> is HTML-parsed as
-          one tree, the parser puts the tokens in the MathML namespace and they
-          typeset. The failure is insertion from HTML
-          <code>&lt;template&gt;</code> into an existing <code>&lt;math&gt;</code>.
-        </p>
-        <div class="stage math">
-          <math display="block">
-            <msup><mi>a</mi><mn>2</mn></msup>
-            <mo>+</mo>
-            <msup><mi>b</mi><mn>2</mn></msup>
-            <mo>=</mo>
-            <msup><mi>c</mi><mn>2</mn></msup>
-          </math>
         </div>
       </section>
     </main>
