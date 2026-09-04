@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <?start name="head">
+    <title>Fallback document — Two pages</title>
+    <meta
+      name="description"
+      content="This browser does not apply template-for replacement, so you are seeing the placeholder document."
+    />
+    <meta name="color-scheme" content="dark" />
+    <style>
+      :root {
+        --bg: #10120c;
+        --ink: #e8ff4a;
+        --paper: #f4f1e4;
+        --mute: #9aa37a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--paper);
+      }
+
+      body {
+        min-height: 100dvh;
+        font: 17px/1.45 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      }
+
+      .fallback {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 32px 20px 72px;
+      }
+
+      .stamp {
+        display: inline-block;
+        margin: 0 0 18px;
+        padding: 4px 8px;
+        border: 2px solid var(--ink);
+        color: var(--ink);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0 0 16px;
+        color: var(--ink);
+        font-size: 2rem;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      p {
+        margin: 0 0 1em;
+      }
+
+      code {
+        color: var(--ink);
+      }
+
+      .box {
+        margin-top: 28px;
+        padding: 14px 16px;
+        border: 1px dashed var(--mute);
+        color: var(--mute);
+      }
+    </style>
+    <?end>
+  </head>
+  <body>
+    <?start name="body">
+    <main class="fallback">
+      <p class="stamp">No template-for</p>
+      <h1>This is the placeholder document.</h1>
+      <p>
+        The browser ignored <code>&lt;template for&gt;</code>, so the
+        <code>&lt;?start&gt;</code> / <code>&lt;?end&gt;</code> ranges were
+        never replaced. You are reading the fallback page that shipped in
+        those ranges.
+      </p>
+      <p>
+        A browser with Declarative Partial Updates would have thrown this
+        page away and filled in a different title, styles, and article from
+        the templates at the bottom of the file.
+      </p>
+      <div class="box">
+        Chrome 148+ can show the other page if
+        <code>chrome://flags/#enable-experimental-web-platform-features</code>
+        is enabled. This file does not load the polyfill, so support has to
+        be native.
+      </div>
+    </main>
+    <?end>
+
+    <template for="head">
+      <title>Patched document — Two pages</title>
+      <meta
+        name="description"
+        content="This browser applied template-for replacement, so you are seeing the patched document."
+      />
+      <meta name="color-scheme" content="light" />
+      <style>
+        :root {
+          --paper: #f3ead6;
+          --ink: #1b1712;
+          --mute: #5c5348;
+          --rule: #c9b89a;
+          --panel: #fff8ea;
+          --leaf: #2f4a3c;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
+        html,
+        body {
+          margin: 0;
+          background: var(--paper);
+          color: var(--ink);
+        }
+
+        body {
+          min-height: 100dvh;
+          font: 18px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino,
+            serif;
+        }
+
+        .patched {
+          max-width: 42rem;
+          margin: 0 auto;
+          padding: 28px 20px 64px;
+        }
+
+        .mark {
+          margin: 0 0 18px;
+          padding-bottom: 14px;
+          border-bottom: 2px solid var(--ink);
+          font-size: 0.78rem;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
+        .kicker {
+          margin: 0 0 8px;
+          color: var(--mute);
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        h1 {
+          margin: 0 0 12px;
+          color: var(--leaf);
+          font-size: 2.2rem;
+          line-height: 1.1;
+          letter-spacing: -0.03em;
+        }
+
+        p {
+          margin: 0 0 1em;
+        }
+
+        code {
+          font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+          font-size: 0.84em;
+        }
+
+        .note {
+          margin-top: 28px;
+          padding: 14px 16px;
+          background: var(--panel);
+          border: 1px solid var(--rule);
+        }
+      </style>
+    </template>
+    <template for="body">
+      <main class="patched">
+        <p class="mark">DPU · template-for</p>
+        <p class="kicker">Replacement applied</p>
+        <h1>This is the patched document.</h1>
+        <p>
+          The browser understood <code>&lt;template for&gt;</code>. It
+          replaced the fallback title, CSS, and article that sat between
+          <code>&lt;?start&gt;</code> and <code>&lt;?end&gt;</code>.
+        </p>
+        <p>
+          That other page is gone from the document. You should not see the
+          dark fallback, the “No template-for” stamp, or the flag
+          instructions.
+        </p>
+        <div class="note">
+          Native support only. This file does not load
+          <code>template-for-polyfill</code>, so a browser without the
+          processing-instruction patch keeps the placeholder page.
+        </div>
+      </main>
+    </template>
+  </body>
+</html>
