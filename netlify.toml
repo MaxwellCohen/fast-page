@@ -1,5 +1,7 @@
 [build]
 publish = "."
+# README.md is repo-only. Remove it before the publish directory is uploaded.
+command = "rm -f README.md"
 
 [[headers]]
 for = "/*"

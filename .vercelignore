@@ -2,3 +2,4 @@ _headers
 .assetsignore
 wrangler.jsonc
 netlify.toml
+README.md
