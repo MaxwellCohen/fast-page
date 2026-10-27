@@ -11,7 +11,7 @@ Static HTML pages for checking how browsers load, stream, and update a document.
 
 Pushes to `main` publish the site on:
 
-- Vercel: https://fast-page.vercel.app
+- Vercel: https://fast-page-ten.vercel.app
 - Netlify: https://splendorous-concha-e646e2.netlify.app
 - Cloudflare Workers: https://fast-page.to-email-max.workers.dev
 
