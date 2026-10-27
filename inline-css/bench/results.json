@@ -1,7 +1,7 @@
 {
   "date": "2026-10-27",
   "browser": "Chrome/156.0.8078.48",
-  "runs": 9,
+  "runs": 7,
   "profiles": [
     {
       "name": "mobile",
@@ -33,149 +33,149 @@
       "small-inline.html": {
         "fcp": 228,
         "lcp": 228,
-        "bytes": 2039,
+        "bytes": 2263,
         "lcpElement": "P"
       },
       "small-link.html": {
-        "fcp": 376,
-        "lcp": 376,
-        "bytes": 2317,
+        "fcp": 388,
+        "lcp": 388,
+        "bytes": 2548,
         "lcpElement": "P"
       },
       "belowfold-inline.html": {
         "fcp": 232,
         "lcp": 232,
-        "bytes": 68240,
+        "bytes": 65179,
         "lcpElement": "P"
       },
       "belowfold-link.html": {
-        "fcp": 208,
-        "lcp": 224,
-        "bytes": 69578,
+        "fcp": 232,
+        "lcp": 232,
+        "bytes": 66595,
         "lcpElement": "P"
       },
       "large-inline.html": {
-        "fcp": 524,
-        "lcp": 524,
-        "bytes": 62395,
+        "fcp": 520,
+        "lcp": 520,
+        "bytes": 59050,
         "lcpElement": "P"
       },
       "large-link.html": {
-        "fcp": 688,
-        "lcp": 688,
-        "bytes": 62660,
+        "fcp": 680,
+        "lcp": 680,
+        "bytes": 59310,
         "lcpElement": "P"
       },
       "large-inline-next.html": {
-        "fcp": 484,
-        "lcp": 484,
-        "bytes": 62377,
+        "fcp": 476,
+        "lcp": 476,
+        "bytes": 59023,
         "lcpElement": "P"
       },
       "large-link-next.html": {
         "fcp": 184,
         "lcp": 184,
-        "bytes": 1041,
+        "bytes": 1070,
         "lcpElement": "P"
       }
     },
     "3g": {
       "small-inline.html": {
-        "fcp": 480,
-        "lcp": 480,
-        "bytes": 2039,
+        "fcp": 492,
+        "lcp": 492,
+        "bytes": 2263,
         "lcpElement": "P"
       },
       "small-link.html": {
-        "fcp": 884,
-        "lcp": 884,
-        "bytes": 2317,
+        "fcp": 924,
+        "lcp": 924,
+        "bytes": 2548,
         "lcpElement": "P"
       },
       "belowfold-inline.html": {
-        "fcp": 488,
-        "lcp": 488,
-        "bytes": 68240,
+        "fcp": 504,
+        "lcp": 504,
+        "bytes": 65179,
         "lcpElement": "P"
       },
       "belowfold-link.html": {
-        "fcp": 468,
-        "lcp": 484,
-        "bytes": 69578,
+        "fcp": 492,
+        "lcp": 492,
+        "bytes": 66595,
         "lcpElement": "P"
       },
       "large-inline.html": {
-        "fcp": 1180,
-        "lcp": 1180,
-        "bytes": 62395,
+        "fcp": 1156,
+        "lcp": 1156,
+        "bytes": 59050,
         "lcpElement": "P"
       },
       "large-link.html": {
-        "fcp": 1608,
-        "lcp": 1608,
-        "bytes": 62660,
+        "fcp": 1544,
+        "lcp": 1544,
+        "bytes": 59310,
         "lcpElement": "P"
       },
       "large-inline-next.html": {
-        "fcp": 1136,
-        "lcp": 1136,
-        "bytes": 62377,
+        "fcp": 1104,
+        "lcp": 1104,
+        "bytes": 59023,
         "lcpElement": "P"
       },
       "large-link-next.html": {
-        "fcp": 436,
-        "lcp": 436,
-        "bytes": 1041,
+        "fcp": 440,
+        "lcp": 440,
+        "bytes": 1070,
         "lcpElement": "P"
       }
     },
     "broadband": {
       "small-inline.html": {
-        "fcp": 96,
-        "lcp": 96,
-        "bytes": 2039,
+        "fcp": 64,
+        "lcp": 64,
+        "bytes": 2263,
         "lcpElement": "P"
       },
       "small-link.html": {
-        "fcp": 100,
-        "lcp": 100,
-        "bytes": 2317,
+        "fcp": 92,
+        "lcp": 92,
+        "bytes": 2548,
         "lcpElement": "P"
       },
       "belowfold-inline.html": {
-        "fcp": 96,
-        "lcp": 96,
-        "bytes": 68240,
+        "fcp": 60,
+        "lcp": 60,
+        "bytes": 65179,
         "lcpElement": "P"
       },
       "belowfold-link.html": {
-        "fcp": 88,
-        "lcp": 88,
-        "bytes": 69578,
+        "fcp": 60,
+        "lcp": 60,
+        "bytes": 66595,
         "lcpElement": "P"
       },
       "large-inline.html": {
-        "fcp": 96,
-        "lcp": 96,
-        "bytes": 62395,
+        "fcp": 80,
+        "lcp": 80,
+        "bytes": 59050,
         "lcpElement": "P"
       },
       "large-link.html": {
-        "fcp": 108,
-        "lcp": 108,
-        "bytes": 62660,
+        "fcp": 112,
+        "lcp": 112,
+        "bytes": 59310,
         "lcpElement": "P"
       },
       "large-inline-next.html": {
-        "fcp": 76,
-        "lcp": 76,
-        "bytes": 62377,
+        "fcp": 80,
+        "lcp": 80,
+        "bytes": 59023,
         "lcpElement": "P"
       },
       "large-link-next.html": {
         "fcp": 36,
         "lcp": 36,
-        "bytes": 1041,
+        "bytes": 1070,
         "lcpElement": "P"
       }
     }

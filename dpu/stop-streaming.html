@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Stop Streaming</title>
+    </head>
+    <body>
+        <h1>Stop Streaming</h1>
+        <?start name="body">
+            <h1>loading...</h1>
+        <?end>
+
+        <template for="body2">
+            <h1>Stop Streaming 2</h1>
+        </template>
+
+        <script>
+            
+        
+
+            // setTimeout(() => {
+                let node = null
+            // 64 = NodeFilter.SHOW_PROCESSING_INSTRUCTION (<?start ...>)
+            const nodes = document.createNodeIterator(
+                document,
+                NodeFilter.SHOW_PROCESSING_INSTRUCTION
+            )
+            while ((node = nodes.nextNode())) {
+                console.log(node.target, node.data)
+                if (node.target === "start" && node.data.includes(`name="body"`)) {
+                    node.data = node.data.replace(`name="body"`, `name="body2"`)
+                    break
+                }
+            }
+            // }, 1000)
+        </script>
+    </body>
+</html>

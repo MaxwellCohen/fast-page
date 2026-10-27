@@ -49,14 +49,19 @@ const icon = () => {
   for (let i = 0, n = 6 + int(10); i < n; i++) d += `${pick(["L", "l", "C", "c", "Q", "q"])}${num(24, 2)} ${num(24, 2)}`;
   return `background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23${int(0xffffff).toString(16).padStart(6, "0")}' d='${d}z'/%3E%3C/svg%3E")`;
 };
-let large = read("small.css") + "\n/* ---- component library (unused by this page, like most of a real bundle) ---- */\n";
+// Chrome parses declaration blocks lazily: a rule whose selector never matches an element is never fully parsed.
+// So every rule also matches .parse-all, a heavy headline at the top of each page: the browser has to parse
+// (and cascade) all of the CSS before it can paint it. small.css restyles .parse-all so it stays readable.
+let large = read("small.css") + "\n/* ---- component library (every rule also matches the .parse-all headline, so none can be skipped) ---- */\n";
 while (large.length < 250_000) {
-  const sel = `.${pick(components)}${pick(parts)}_${hash()}${pick(states)}`;
+  const sel = `.${pick(components)}${pick(parts)}_${hash()}${pick(states)},.parse-all`;
   const decls = Array.from({ length: 2 + int(5) }, () => pick(props)());
   if (rnd() < 0.06) decls.push(icon());
   large += `${sel}{${decls.join(";")}}\n`;
-  if (rnd() < 0.02) large += `@media (min-width:${pick([576, 768, 992, 1200, 1400])}px){.${pick(components)}_${hash()}{${pick(props)()}}}\n`;
+  if (rnd() < 0.02) large += `@media (min-width:${pick([576, 768, 992, 1200, 1400])}px){.${pick(components)}_${hash()},.parse-all{${pick(props)()}}}\n`;
 }
+// Matched by every component-library rule above, and the first thing on the page.
+const parseAll = `<p class="parse-all">Every rule in this stylesheet applies to this text.</p>`;
 write("large.css", large);
 
 // ---------------------------------------------------------------------------
@@ -112,6 +117,7 @@ function page({ file, title, scenario, mode, cssName, belowFold = false, next = 
     ${belowFold ? css("small", "inline") : css(cssName, mode)}
   </head>
   <body class="bg-slate-50 text-slate-900">
+    ${parseAll}
     <header class="border-b border-slate-200 bg-white">
       <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
         <a class="font-semibold hover:underline" href="/inline-css/">&larr; inline-css</a>
@@ -188,6 +194,7 @@ const sweepPage = (n, mode) => {
     ${head}
   </head>
   <body class="bg-slate-50 text-slate-900">
+    ${parseAll}
     <header class="border-b border-slate-200 bg-white">
       <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
         <a class="font-semibold hover:underline" href="/inline-css/sweep/">&larr; size sweep</a>

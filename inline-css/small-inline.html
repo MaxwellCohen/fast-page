@@ -46,13 +46,17 @@ img{display:block;max-width:100%;height:auto}
 .md\:text-6xl{font-size:3.75rem;line-height:1}
 .md\:px-8{padding-left:2rem;padding-right:2rem}
 }
+/* Heavy headline at the top of every page. Every component-library rule in large.css also matches it, so it can't
+   paint until all of that CSS is parsed and cascaded; this rule outranks them (0,1,1 > 0,1,0) so it stays readable. */
+body .parse-all{display:block;margin:0;padding:2rem 1.5rem;width:auto;z-index:auto;color:#0f172a;background:#fff;border-color:#e2e8f0;border-radius:0;box-shadow:none;transform:none;transition:none;grid-template-columns:none;font-size:3.75rem;font-weight:900;line-height:1;letter-spacing:-.04em;text-align:center}
 </style>
   </head>
   <body class="bg-slate-50 text-slate-900">
+    <p class="parse-all">Every rule in this stylesheet applies to this text.</p>
     <header class="border-b border-slate-200 bg-white">
       <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
         <a class="font-semibold hover:underline" href="/inline-css/">&larr; inline-css</a>
-        <span class="font-mono text-slate-500">1 · inline wins &middot; CSS: &lt;style&gt; small.css (3.2 KB raw / 1.1 KB brotli)</span>
+        <span class="font-mono text-slate-500">1 · inline wins &middot; CSS: &lt;style&gt; small.css (3.8 KB raw / 1.3 KB brotli)</span>
         <a class="text-indigo-600 hover:underline" href="/inline-css/small-link.html">compare: link &rarr;</a>
       </div>
     </header>

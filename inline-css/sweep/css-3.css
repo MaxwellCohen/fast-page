@@ -39,3 +39,6 @@ img{display:block;max-width:100%;height:auto}
 .md\:text-6xl{font-size:3.75rem;line-height:1}
 .md\:px-8{padding-left:2rem;padding-right:2rem}
 }
+/* Heavy headline at the top of every page. Every component-library rule in large.css also matches it, so it can't
+   paint until all of that CSS is parsed and cascaded; this rule outranks them (0,1,1 > 0,1,0) so it stays readable. */
+body .parse-all{display:block;margin:0;padding:2rem 1.5rem;width:auto;z-index:auto;color:#0f172a;background:#fff;border-color:#e2e8f0;border-radius:0;box-shadow:none;transform:none;transition:none;grid-template-columns:none;font-size:3.75rem;font-weight:900;line-height:1;letter-spacing:-.04em;text-align:center}
