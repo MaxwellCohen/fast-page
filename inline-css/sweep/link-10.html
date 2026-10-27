@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>10 KB CSS (link)</title>
+    <link rel="stylesheet" href="/inline-css/sweep/css-10.css" />
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
+        <a class="font-semibold hover:underline" href="/inline-css/sweep/">&larr; size sweep</a>
+        <span class="font-mono text-slate-500">CSS: &lt;link&gt; 9.7 KB raw / 3.2 KB brotli</span>
+        <span>compare: <a class="text-indigo-600 hover:underline" href="/inline-css/sweep/inline-10.html">inline</a> &middot; <a class="text-indigo-600 hover:underline" href="/inline-css/sweep/dup-10.html">dup</a></span>
+      </div>
+    </header>
+    <main>
+      <section class="bg-gradient text-white">
+        <div class="max-w-5xl mx-auto px-6 md:px-8 py-16">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-tight">10 KB of CSS</h1>
+        <p class="mt-6 text-xl leading-relaxed text-indigo-100">Before a browser can paint anything it needs every render-blocking stylesheet in the head. With a link tag that means: download the HTML, parse it, find the link, then make a second request and wait for it. With a style tag the CSS is already in the HTML response, so the first paint can happen as soon as the head has arrived. The difference is roughly one network round trip, plus the time to download the stylesheet bytes. On a fast, nearby connection that is a few milliseconds. On a mobile connection with 150 ms of latency it is often the single biggest item on the critical path.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
