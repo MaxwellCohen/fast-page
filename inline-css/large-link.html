@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Large CSS bundle (link)</title>
+    <link rel="stylesheet" href="/inline-css/large.css" />
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
+        <a class="font-semibold hover:underline" href="/inline-css/">&larr; inline-css</a>
+        <span class="font-mono text-slate-500">3 · link wins &middot; CSS: &lt;link&gt; large.css (244.2 KB raw / 60.0 KB brotli)</span>
+        <a class="text-indigo-600 hover:underline" href="/inline-css/large-inline.html">compare: inline &rarr;</a>
+      </div>
+    </header>
+    <main>
+      <section class="bg-gradient text-white">
+        <div class="max-w-5xl mx-auto px-6 md:px-8 py-16">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-tight">Large CSS bundle</h1>
+        <p class="mt-6 text-xl leading-relaxed text-indigo-100">Before a browser can paint anything it needs every render-blocking stylesheet in the head. With a link tag that means: download the HTML, parse it, find the link, then make a second request and wait for it. With a style tag the CSS is already in the HTML response, so the first paint can happen as soon as the head has arrived. The difference is roughly one network round trip, plus the time to download the stylesheet bytes. On a fast, nearby connection that is a few milliseconds. On a mobile connection with 150 ms of latency it is often the single biggest item on the critical path.</p>
+        </div>
+      </section>
+      <section class="max-w-5xl mx-auto px-6 py-12">
+        <div class="bg-amber-50 text-amber-800 rounded-lg p-6 text-sm leading-relaxed">The same bundle linked. The first page pays an extra round trip, but large.css goes into the HTTP cache, and every page after it skips the bytes and the round trip.</div>
+        <p class="mt-6 text-sm text-slate-600">Next: <a class="text-indigo-600 underline" href="/inline-css/large-link-next.html">go to the second page of this site &rarr;</a></p>
+      </section>
+    </main>
+  </body>
+</html>

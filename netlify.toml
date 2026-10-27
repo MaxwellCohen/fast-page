@@ -1,7 +1,7 @@
 [build]
 publish = "."
-# README.md is repo-only. Remove it before the publish directory is uploaded.
-command = "rm -f README.md"
+# README.md and inline-css/bench are repo-only. Remove them before the publish directory is uploaded.
+command = "rm -rf README.md inline-css/bench"
 
 [[headers]]
 for = "/*"

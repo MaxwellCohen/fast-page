@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Small CSS, text LCP (link)</title>
+    <link rel="stylesheet" href="/inline-css/small.css" />
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between text-sm">
+        <a class="font-semibold hover:underline" href="/inline-css/">&larr; inline-css</a>
+        <span class="font-mono text-slate-500">1 · inline wins &middot; CSS: &lt;link&gt; small.css (3.2 KB raw / 1.1 KB brotli)</span>
+        <a class="text-indigo-600 hover:underline" href="/inline-css/small-inline.html">compare: inline &rarr;</a>
+      </div>
+    </header>
+    <main>
+      <section class="bg-gradient text-white">
+        <div class="max-w-5xl mx-auto px-6 md:px-8 py-16">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-tight">Small CSS, text LCP</h1>
+        <p class="mt-6 text-xl leading-relaxed text-indigo-100">Before a browser can paint anything it needs every render-blocking stylesheet in the head. With a link tag that means: download the HTML, parse it, find the link, then make a second request and wait for it. With a style tag the CSS is already in the HTML response, so the first paint can happen as soon as the head has arrived. The difference is roughly one network round trip, plus the time to download the stylesheet bytes. On a fast, nearby connection that is a few milliseconds. On a mobile connection with 150 ms of latency it is often the single biggest item on the critical path.</p>
+        </div>
+      </section>
+      <section class="max-w-5xl mx-auto px-6 py-12">
+        <div class="bg-amber-50 text-amber-800 rounded-lg p-6 text-sm leading-relaxed">Same page, but the 3 KB stylesheet is linked. The browser can't paint until it has fetched small.css, which costs an extra round trip after the HTML arrives.</div>
+        <p class="mt-6 text-sm text-slate-600"></p>
+      </section>
+    </main>
+  </body>
+</html>

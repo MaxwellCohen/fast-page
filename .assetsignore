@@ -9,3 +9,4 @@ vercel.json
 .assetsignore
 LICENSE
 README.md
+inline-css/bench

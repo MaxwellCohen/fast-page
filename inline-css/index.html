@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inline vs linked CSS: FCP and LCP on first visit</title>
+    <style>
+      body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:68rem;margin:0 auto;padding:2rem 1.25rem;line-height:1.55;color:#1e293b;background:#f8fafc}
+      h1{font-size:2rem;margin:0 0 .5rem}h2{margin-top:2.5rem;border-bottom:1px solid #e2e8f0;padding-bottom:.25rem}
+      a{color:#4f46e5}code{font-family:ui-monospace,Menlo,monospace;font-size:.9em;background:#eef2ff;padding:.05em .3em;border-radius:3px}
+      .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1rem;margin-top:1rem}
+      .card{background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;padding:1rem 1.25rem}
+      .card h3{margin:.25rem 0 .5rem}.tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+      .t-in{color:#15803d}.t-eq{color:#64748b}.t-ln{color:#b45309}
+      table{border-collapse:collapse;width:100%;font-size:.85rem;background:#fff;margin-top:1rem}
+      caption{text-align:left;font-weight:600;padding:.5rem 0}
+      th,td{border:1px solid #e2e8f0;padding:.35rem .5rem;text-align:left;vertical-align:top}th{background:#f1f5f9}
+      .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+      .win{background:#dcfce7}.lose{background:#fee2e2}
+      .small{font-size:.85rem;color:#64748b}
+    </style>
+  </head>
+  <body>
+    <p><a href="/">&larr; fast-page</a></p>
+    <h1>Inline vs linked CSS</h1>
+    <p>Next.js's <a href="https://nextjs.org/docs/app/api-reference/config/next-config-js/inlineCss"><code>experimental.inlineCss</code></a> swaps every <code>&lt;link rel="stylesheet"&gt;</code> for a <code>&lt;style&gt;</code> tag. The docs say this speeds up FCP and LCP for first-time visitors, with the trade-off that the CSS can't be cached. These pages measure how much it actually changes. They are plain HTML and CSS with no JavaScript.</p>
+
+    <h2>Summary</h2>
+    <div class="cards">
+      <div class="card"><div class="tag t-in">Inline</div><h3>First visit on a high-latency connection</h3>
+        <p>A linked stylesheet is only discovered once the HTML arrives, and then it costs a second round trip. Inlining removes that, so FCP and LCP both move earlier by about one RTT plus the CSS download. Measured with 3 KB of atomic CSS: <b>148 ms</b> faster LCP on mobile and <b>404 ms</b> on high-latency 3G, for +1.0 KB of HTML.</p>
+        <p><a href="small-inline.html">small-inline</a> &middot; <a href="small-link.html">small-link</a></p></div>
+      <div class="card"><div class="tag t-eq">Doesn't matter</div><h3>Low latency, or CSS that isn't render-blocking</h3>
+        <p>On broadband (20 ms RTT) the extra request costs 4 ms, which is within run-to-run noise. CSS placed after the LCP content (for example, a stylesheet for below-the-fold widgets in the body) doesn't affect FCP or LCP either way. Measured LCP difference (link minus inline): -8 ms on mobile and -4 ms on 3G.</p>
+        <p><a href="belowfold-inline.html">belowfold-inline</a> &middot; <a href="belowfold-link.html">belowfold-link</a></p></div>
+      <div class="card"><div class="tag t-ln">Link</div><h3>Large CSS and more than one page view</h3>
+        <p>With a 250 KB bundle (60.0 KB brotli), inlining still wins on the very first page (164 ms on mobile). Every later page re-downloads the bundle inside its HTML, though, while the linked file comes from cache. On page 2 the linked version is <b>300 ms</b> faster on mobile and <b>700 ms</b> faster on 3G.</p>
+        <p><a href="large-inline.html">large-inline</a> &rarr; <a href="large-inline-next.html">page 2</a> &middot; <a href="large-link.html">large-link</a> &rarr; <a href="large-link-next.html">page 2</a></p></div>
+    </div>
+    <p>Rule of thumb: inlining saves about <b>one RTT per first page view</b> and costs <b>the CSS bytes on every page view after it</b>. Inline when the CSS is small enough that re-sending it is cheaper than a round trip (atomic CSS, single landing pages). Link when the bundle is large and visitors view more than one page.</p>
+
+    <h2>Measured results</h2>
+    <p>Median of 9 cold loads per cell, in milliseconds. Each load uses a fresh browser context, so there is no HTTP cache and no warm connection. <span class="win">&nbsp;green&nbsp;</span> means inline is faster by more than 30 ms, and <span class="lose">&nbsp;red&nbsp;</span> means link is faster by more than 30 ms. "Bytes" is the total transferred (brotli) for the document plus its CSS.</p>
+    <ul><li><b>Mobile (slow 4G)</b>: 150 ms RTT, 1.6 Mbps down, 4&times; CPU slowdown</li><li><b>High-latency 3G</b>: 400 ms RTT, 0.7 Mbps down, 4&times; CPU slowdown</li><li><b>Broadband</b>: 20 ms RTT, 20.0 Mbps down</li></ul>
+    <table><caption>1 · Small CSS (3 KB), text LCP: inline wins</caption><thead><tr><th>Network</th><th>Pages</th>
+    <th>FCP inline</th><th>FCP link</th><th>link &minus; inline</th>
+    <th>LCP inline</th><th>LCP link</th><th>link &minus; inline</th>
+    <th>Bytes inline</th><th>Bytes link</th></tr></thead><tbody><tr><td>Mobile (slow 4G)</td><td><a href="small-inline.html">small-inline.html</a> vs <a href="small-link.html">small-link.html</a></td>
+        <td class="num">228</td><td class="num">376</td><td class="num win">+148</td>
+        <td class="num">228</td><td class="num">376</td><td class="num win">+148</td>
+        <td class="num">2.0 KB</td><td class="num">2.3 KB</td></tr><tr><td>High-latency 3G</td><td><a href="small-inline.html">small-inline.html</a> vs <a href="small-link.html">small-link.html</a></td>
+        <td class="num">480</td><td class="num">884</td><td class="num win">+404</td>
+        <td class="num">480</td><td class="num">884</td><td class="num win">+404</td>
+        <td class="num">2.0 KB</td><td class="num">2.3 KB</td></tr><tr><td>Broadband</td><td><a href="small-inline.html">small-inline.html</a> vs <a href="small-link.html">small-link.html</a></td>
+        <td class="num">96</td><td class="num">100</td><td class="num ">+4</td>
+        <td class="num">96</td><td class="num">100</td><td class="num ">+4</td>
+        <td class="num">2.0 KB</td><td class="num">2.3 KB</td></tr></tbody></table>
+    <table><caption>2 · Below-the-fold CSS (250 KB) in the body, small critical CSS inlined in the head: doesn't matter</caption><thead><tr><th>Network</th><th>Pages</th>
+    <th>FCP inline</th><th>FCP link</th><th>link &minus; inline</th>
+    <th>LCP inline</th><th>LCP link</th><th>link &minus; inline</th>
+    <th>Bytes inline</th><th>Bytes link</th></tr></thead><tbody><tr><td>Mobile (slow 4G)</td><td><a href="belowfold-inline.html">belowfold-inline.html</a> vs <a href="belowfold-link.html">belowfold-link.html</a></td>
+        <td class="num">232</td><td class="num">208</td><td class="num ">-24</td>
+        <td class="num">232</td><td class="num">224</td><td class="num ">-8</td>
+        <td class="num">66.6 KB</td><td class="num">67.9 KB</td></tr><tr><td>High-latency 3G</td><td><a href="belowfold-inline.html">belowfold-inline.html</a> vs <a href="belowfold-link.html">belowfold-link.html</a></td>
+        <td class="num">488</td><td class="num">468</td><td class="num ">-20</td>
+        <td class="num">488</td><td class="num">484</td><td class="num ">-4</td>
+        <td class="num">66.6 KB</td><td class="num">67.9 KB</td></tr><tr><td>Broadband</td><td><a href="belowfold-inline.html">belowfold-inline.html</a> vs <a href="belowfold-link.html">belowfold-link.html</a></td>
+        <td class="num">96</td><td class="num">88</td><td class="num ">-8</td>
+        <td class="num">96</td><td class="num">88</td><td class="num ">-8</td>
+        <td class="num">66.6 KB</td><td class="num">67.9 KB</td></tr></tbody></table>
+    <table><caption>3a · Large CSS (250 KB), first page of the visit: inline still wins</caption><thead><tr><th>Network</th><th>Pages</th>
+    <th>FCP inline</th><th>FCP link</th><th>link &minus; inline</th>
+    <th>LCP inline</th><th>LCP link</th><th>link &minus; inline</th>
+    <th>Bytes inline</th><th>Bytes link</th></tr></thead><tbody><tr><td>Mobile (slow 4G)</td><td><a href="large-inline.html">large-inline.html</a> vs <a href="large-link.html">large-link.html</a></td>
+        <td class="num">524</td><td class="num">688</td><td class="num win">+164</td>
+        <td class="num">524</td><td class="num">688</td><td class="num win">+164</td>
+        <td class="num">60.9 KB</td><td class="num">61.2 KB</td></tr><tr><td>High-latency 3G</td><td><a href="large-inline.html">large-inline.html</a> vs <a href="large-link.html">large-link.html</a></td>
+        <td class="num">1180</td><td class="num">1608</td><td class="num win">+428</td>
+        <td class="num">1180</td><td class="num">1608</td><td class="num win">+428</td>
+        <td class="num">60.9 KB</td><td class="num">61.2 KB</td></tr><tr><td>Broadband</td><td><a href="large-inline.html">large-inline.html</a> vs <a href="large-link.html">large-link.html</a></td>
+        <td class="num">96</td><td class="num">108</td><td class="num ">+12</td>
+        <td class="num">96</td><td class="num">108</td><td class="num ">+12</td>
+        <td class="num">60.9 KB</td><td class="num">61.2 KB</td></tr></tbody></table>
+    <table><caption>3b · Large CSS, second page in the same session (CSS already cached from page 1): link wins</caption><thead><tr><th>Network</th><th>Pages</th>
+    <th>FCP inline</th><th>FCP link</th><th>link &minus; inline</th>
+    <th>LCP inline</th><th>LCP link</th><th>link &minus; inline</th>
+    <th>Bytes inline</th><th>Bytes link</th></tr></thead><tbody><tr><td>Mobile (slow 4G)</td><td><a href="large-inline-next.html">large-inline-next.html</a> vs <a href="large-link-next.html">large-link-next.html</a></td>
+        <td class="num">484</td><td class="num">184</td><td class="num lose">-300</td>
+        <td class="num">484</td><td class="num">184</td><td class="num lose">-300</td>
+        <td class="num">60.9 KB</td><td class="num">1.0 KB</td></tr><tr><td>High-latency 3G</td><td><a href="large-inline-next.html">large-inline-next.html</a> vs <a href="large-link-next.html">large-link-next.html</a></td>
+        <td class="num">1136</td><td class="num">436</td><td class="num lose">-700</td>
+        <td class="num">1136</td><td class="num">436</td><td class="num lose">-700</td>
+        <td class="num">60.9 KB</td><td class="num">1.0 KB</td></tr><tr><td>Broadband</td><td><a href="large-inline-next.html">large-inline-next.html</a> vs <a href="large-link-next.html">large-link-next.html</a></td>
+        <td class="num">76</td><td class="num">36</td><td class="num lose">-40</td>
+        <td class="num">76</td><td class="num">36</td><td class="num lose">-40</td>
+        <td class="num">60.9 KB</td><td class="num">1.0 KB</td></tr></tbody></table>
+    <p class="small">Measured 2026-10-27 with Chrome/156.0.8078.48 (headless) over a local server using brotli (quality 11), as the CDNs serving this site do. Network shaping uses Chrome DevTools throttling, which adds the RTT to every request but doesn't model TCP/TLS handshakes or slow start. Real networks add more cost to each extra request than shown here, so the "inline wins" gaps are a lower bound.</p>
+
+    <h2>Sizes</h2>
+    <table><thead><tr><th>Asset</th><th class="num">Raw</th><th class="num">gzip</th><th class="num">brotli</th></tr></thead><tbody>
+      <tr><td><a href="small.css">small.css</a></td><td class="num">3.2 KB</td><td class="num">1.3 KB</td><td class="num">1.1 KB</td></tr>
+      <tr><td><a href="large.css">large.css</a></td><td class="num">244.2 KB</td><td class="num">71.4 KB</td><td class="num">60.0 KB</td></tr>
+      <tr><td>small-inline.html / small-link.html</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">1.8 KB / 0.7 KB</td></tr>
+      <tr><td>large-inline.html / large-link.html</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">60.7 KB / 0.8 KB</td></tr>
+    </tbody></table>
+
+    <h2>Why</h2>
+    <ul>
+      <li><b>A linked stylesheet costs one round trip plus its bytes.</b> The browser only finds the <code>&lt;link&gt;</code> after the HTML arrives, then has to request the file. Inlining saves the round trip but not the bytes.</li>
+      <li><b>So the gain scales with RTT, not with CSS size.</b> 3 KB or 250 KB, inlining saves about one RTT on a first visit (148 vs 164 ms on mobile). The cost scales with CSS size: the bytes are re-sent on every page view.</li>
+      <li><b>LCP only improves if the CSS is on its critical path.</b> Chrome blocks rendering only for content after a stylesheet, so CSS placed after the LCP content doesn't delay it, whether inlined or linked. The same is true when the LCP waits on something slower than the CSS, like an image, font, or API response.</li>
+      <li><b>A long document doesn't hide the cost.</b> Chrome paints progressively, so even a 150 KB article page still waits for the linked stylesheet before its first paint.</li>
+      <li><b>Caching is where linking wins.</b> Inlined CSS is part of each HTML response. Most sites serve HTML with a short cache lifetime (or none), so the CSS is downloaded on every navigation.</li>
+    </ul>
+
+    <h2>Try it yourself</h2>
+    <p>In Chrome DevTools, check <i>Network &rarr; Disable cache</i>, set throttling to <i>Slow 4G</i>, and record a <i>Performance</i> trace of each page in a pair. To reproduce the table: <code>node inline-css/bench/measure.mjs &amp;&amp; node inline-css/bench/build.mjs</code>.</p>
+  </body>
+</html>
