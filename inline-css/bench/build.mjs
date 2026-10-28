@@ -481,6 +481,16 @@ write("index.html", `<!DOCTYPE html>
       <li><b>Caching is where linking wins.</b> Inlined CSS is part of each HTML response. Most sites serve HTML with a short cache lifetime (or none), so the CSS is downloaded on every navigation.</li>
     </ul>
 
+    <h2>What other performance folks say</h2>
+    <p>Published measurements point the same way as the table above: inlining saves about a round trip on a cold first visit. The caveats below are things these pages don't measure.</p>
+    <ul>
+      <li><b>Barry Pollard (Chrome) and Philip Walton, <a href="https://web.dev/articles/optimize-lcp">Optimize Largest Contentful Paint</a></b> (web.dev, updated 2025). Inlining is "only recommended if your style sheet is small", because inlined CSS can't be cached across page loads. Their preferred fix is to make the stylesheet smaller than the LCP resource: remove unused CSS, defer non-critical CSS, and minify and compress the rest.</li>
+      <li><b>Barry Pollard, <a href="https://www.tunetheweb.com/blog/inlining-css-is-not-for-me/">Inlining CSS is not for me</a></b> (tunetheweb.com, 2015, updated 2022). Inlining cut first paint from 1.271 s to 0.879 s, and cached first paint from 0.428 s to 0.254 s. He still chose not to inline, citing build complexity, CSS repeated on every page, harder debugging, and friction with Content Security Policy.</li>
+      <li><b>Barry Pollard, <a href="https://www.tunetheweb.com/blog/critical-resources-and-the-first-14kb/">Critical resources and the first 14 KB</a></b> (tunetheweb.com, 2019, updated 2022). Explains the TCP slow-start reasoning behind "render in the first round trip", which the DevTools throttling used here doesn't model. TLS, HTTP/2 setup, and response headers use part of that budget, so treat 14 KB as a rule of thumb, not a limit.</li>
+      <li><b>Matt Zeunert (DebugBear), <a href="https://www.debugbear.com/blog/critical-css">Inlining Critical CSS: Does It Make Your Website Faster?</a></b> (2025). "If you just inline critical CSS you won't see an improvement": the full stylesheet also has to stop blocking rendering. Its listed downsides are larger HTML, no caching across pages, critical CSS that changes with viewport and login state, and layout shifts when the full stylesheet arrives. See also <a href="https://www.debugbear.com/blog/lcp-render-delay">Fix Your LCP Score By Improving Render Delay</a>.</li>
+      <li><b>Harry Roberts, <a href="https://csswizardry.com/2022/09/critical-css-not-so-fast/">Critical CSS? Not So Fast!</a></b> (CSS Wizardry, 2022). The counterpoint. If synchronous JavaScript in the <code>&lt;head&gt;</code> is the bottleneck, inlining changes nothing: in his demo, Start Render was identical with and without critical CSS. The <code>media="print"</code> swap trick can backfire because print stylesheets get the lowest priority (one waited over 12 s). He recommends long-cached, fingerprinted CSS bundles for most existing sites rather than adding critical CSS later.</li>
+    </ul>
+
     <h2>Try it yourself</h2>
     <p>In Chrome DevTools, check <i>Network &rarr; Disable cache</i>, set throttling to <i>Slow 4G</i>, and record a <i>Performance</i> trace of each page in a pair. To reproduce the table: <code>node inline-css/bench/measure.mjs &amp;&amp; node inline-css/bench/build.mjs</code>.</p>
   </body>
